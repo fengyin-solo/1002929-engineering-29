@@ -20,8 +20,10 @@
 
 <script setup lang="ts">
 import { useSessionStore } from '@/stores/session'
+import { NAV_ENTRIES } from '@/nav/manifest'
 
 const store = useSessionStore()
 
-const navItems = [{ label: "运营概览", path: "/" }, { label: "使用登记", path: "/register" }, { label: "锅炉管理", path: "/boiler" }, { label: "压力容器", path: "/pressurevessel" }, { label: "压力管道", path: "/pipeline" }, { label: "电梯管理", path: "/elevator" }, { label: "起重机械", path: "/crane" }, { label: "场车管理", path: "/forklift" }, { label: "定期检验", path: "/inspection" }, { label: "维保记录", path: "/maintenance" }, { label: "隐患排查", path: "/hazard" }, { label: "事故管理", path: "/accident" }, { label: "作业人员", path: "/operator" }, { label: "培训考核", path: "/training" }, { label: "安全阀校验", path: "/safetyvalve" }, { label: "压力表检定", path: "/gauge" }, { label: "备件管理", path: "/sparepart" }, { label: "应急演练", path: "/emergency" }, { label: "能效监测", path: "/energyeff" }, { label: "档案管理", path: "/archive" }, { label: "维保合同", path: "/contract" }]
+// 导航菜单与路由共用 src/nav/manifest.ts 这一份清单，不再在模板里手抄一遍
+const navItems = NAV_ENTRIES
 </script>

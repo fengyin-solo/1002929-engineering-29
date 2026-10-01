@@ -5,45 +5,67 @@
 这是一个前后端分离的管理平台：前端 Vue 3 + Vite + TypeScript，后端 FastAPI（Python）。
 两边各自独立启动，前端 dev server 已关掉自动打开页面，启动后按终端打印的地址手工打开。
 
+## 本地开发：一套固定动作
+
+所有机器上都按同样的顺序来，不用再手记：
+
+```bash
+make install    # 1. 按锁文件装前后端依赖（已装好会跳过，可反复跑，不会多出一份）
+make check      # 2. 体检：工具链/锁文件/依赖/端口占用/后端连通，缺哪一步直接停下并说清
+make backend    # 3. 起后端（内部会再自检依赖与端口）
+make frontend   # 4. 起前端（npm run dev 会先预检端口与后端连通，再启动 Vite）
+```
+
+要点：
+
+- **依赖按锁文件装**：后端 `backend/requirements.lock`、前端 `frontend/package-lock.json`
+  都随仓库提交。锁文件缺失时 `make install` 会自动生成一份，请把生成结果提交，之后所有机器按它装，
+  装出来的依赖版本完全一致。
+- **失败可断点续装**：哪一步失败就在哪一步停下并给出续跑命令；修好后重跑 `make install` 即可，
+  已装的部分不会重复安装。
+- **起服务前先查端口和后端连通**：后端端口被占、或前端起来时后端连不通，都会被直接拦下，
+  不会带着错误端口起服务。
+- 不想用 make 时也可以直接调脚本：`node scripts/dev.mjs prepare|doctor|preflight|print`。
+
+健康检查：`curl <后端地址>/api/health`（后端地址默认 `http://127.0.0.1:8000`）。
+
+## 端口与配置：只改一处
+
+本地端口/地址的唯一事实源是 `config/local-dev.json`：后端 `app/config.py`（监听端口与 CORS）、
+前端 `vite.config.ts`（dev server 端口与 `/api` 代理目标）、`scripts/dev.mjs`、
+`docker-compose.yml` 都读这一份。改一处，前后端与各种入口自动同步，不需要两处手抄。
+
+需要临时覆盖时用环境变量 `BACKEND_HOST/BACKEND_PORT/FRONTEND_HOST/FRONTEND_PORT`
+（docker compose 也认），或用 `DEV_CONFIG=/path/to.json` 指向另一份配置；
+容器内置 `SKIP_DEV_CONFIG=1` 走默认值，不依赖该文件。
+
+## 菜单与路由：同一份清单
+
+左侧导航菜单和前端路由都由 `frontend/src/nav/manifest.ts` 这一份清单生成：
+`src/router/index.ts` 从它生成路由，`src/App.vue` 从它渲染菜单。新增业务模块时只改这一个文件、
+再补对应的 `views/<模块>/index.vue` 即可，两处不会再各写一套导致漏项或顺序不一致。
+
 ## 目录结构
 
 ```text
 .
+├── config/local-dev.json     本地开发唯一事实源：端口、健康检查路径
+├── scripts/dev.mjs           固定动作：prepare/doctor/preflight/print（零依赖 Node 脚本）
 ├── frontend/                 Vue 3 + Vite + TypeScript 前端
+│   ├── src/nav/manifest.ts   导航菜单与路由的唯一清单
 │   ├── src/views/            每个业务模块一个页面
 │   ├── src/api/              统一请求封装
 │   ├── src/stores/           会话与筛选状态
-│   └── vite.config.ts        dev server 配置（open: false）
+│   └── vite.config.ts        dev server 配置（读 config/local-dev.json，open: false）
 ├── backend/                  FastAPI（Python） 后端
 │   ├── app/routers/          每个业务模块一组接口
 │   ├── app/services/         业务规则与状态流转
-│   └── app/store.py          内存数据仓库与示例数据
+│   ├── app/store.py          内存数据仓库与示例数据
+│   ├── requirements.lock     后端依赖锁（pip 精确版本）
+│   └── run.sh                后端固定启动动作（装依赖→预检→起服务）
 ├── .gitignore
 └── docker-compose.yml
 ```
-
-## 启动
-
-### 后端
-
-```bash
-cd backend
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-./run.sh
-```
-
-健康检查：`curl http://127.0.0.1:8000/api/health`
-
-### 前端
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-前端默认监听 `http://127.0.0.1:5173/`，dev server 不会自动打开浏览器，
-需要自己访问。`/api` 由 vite 代理到后端 `http://127.0.0.1:8000`。
 
 ## 业务模块
 

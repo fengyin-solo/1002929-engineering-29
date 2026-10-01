@@ -1,13 +1,27 @@
+# 端口默认值与 config/local-dev.json 保持一致；需要整体改端口时，
+# 在仓库根放一份 .env 写 BACKEND_PORT/FRONTEND_PORT（或直接改 config/local-dev.json），
+# 本地直跑与 compose 取到的是同一组值。
 services:
   backend:
     build: ./backend
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"
     environment:
       - APP_ENV=local
+      - BACKEND_HOST=0.0.0.0
+      - BACKEND_PORT=8000
+      - FRONTEND_HOST=0.0.0.0
+      - FRONTEND_PORT=${FRONTEND_PORT:-5173}
+      - SKIP_DEV_CONFIG=1
   frontend:
     build: ./frontend
     ports:
-      - "5173:5173"
+      - "${FRONTEND_PORT:-5173}:5173"
+    environment:
+      # 容器内监听所有网卡；代理目标指向同一 compose 网络里的 backend 服务
+      - FRONTEND_HOST=0.0.0.0
+      - VITE_PROXY_TARGET=http://backend:8000
+      - SKIP_DEV_CONFIG=1
+      - SKIP_DEV_PREFLIGHT=1
     depends_on:
       - backend

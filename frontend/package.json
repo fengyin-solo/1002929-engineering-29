@@ -4,10 +4,13 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "predev": "node ../scripts/dev.mjs preflight frontend",
     "dev": "vite",
+    "dev:raw": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "check": "node ../scripts/dev.mjs doctor"
   },
   "dependencies": {
     "pinia": "^2.1.7",

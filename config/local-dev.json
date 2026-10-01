@@ -1,0 +1,13 @@
+{
+  "backend": {
+    "host": "127.0.0.1",
+    "port": 8123
+  },
+  "frontend": {
+    "host": "127.0.0.1",
+    "port": 5273
+  },
+  "healthPath": "/api/health",
+  "proxyPath": "/api",
+  "_comment": "本地开发的唯一事实源：后端/前端端口、健康检查路径都在这里改。后端 app/config.py、前端 vite.config.ts、scripts/dev.mjs 与 docker-compose.yml 都读这一份。可用环境变量覆盖：BACKEND_HOST/BACKEND_PORT/FRONTEND_HOST/FRONTEND_PORT，或用 DEV_CONFIG 指定另一份配置。容器内由 SKIP_DEV_CONFIG=1 跳过对该文件的依赖。"
+}

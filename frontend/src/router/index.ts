@@ -1,52 +1,35 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 
 import Dashboard from '@/views/Dashboard.vue'
-const Register = () => import('@/views/register/index.vue')
-const Boiler = () => import('@/views/boiler/index.vue')
-const Pressurevessel = () => import('@/views/pressurevessel/index.vue')
-const Pipeline = () => import('@/views/pipeline/index.vue')
-const Elevator = () => import('@/views/elevator/index.vue')
-const Crane = () => import('@/views/crane/index.vue')
-const Forklift = () => import('@/views/forklift/index.vue')
-const Inspection = () => import('@/views/inspection/index.vue')
-const Maintenance = () => import('@/views/maintenance/index.vue')
-const Hazard = () => import('@/views/hazard/index.vue')
-const Accident = () => import('@/views/accident/index.vue')
-const Operator = () => import('@/views/operator/index.vue')
-const Training = () => import('@/views/training/index.vue')
-const Safetyvalve = () => import('@/views/safetyvalve/index.vue')
-const Gauge = () => import('@/views/gauge/index.vue')
-const Sparepart = () => import('@/views/sparepart/index.vue')
-const Emergency = () => import('@/views/emergency/index.vue')
-const Energyeff = () => import('@/views/energyeff/index.vue')
-const Archive = () => import('@/views/archive/index.vue')
-const Contract = () => import('@/views/contract/index.vue')
+import { NAV_ENTRIES } from '@/nav/manifest'
+
+// views 下所有业务页面：view 'boiler' -> views/boiler/index.vue
+const pageModules = import.meta.glob('@/views/*/index.vue')
+
+// glob 的 key 是 '@/views/...' 还是 '/src/views/...' 取决于别名展开，按后缀归一化匹配
+function resolveComponent(view: string) {
+  if (view === 'Dashboard') return Dashboard
+  const suffix = `views/${view}/index.vue`
+  const loader =
+    pageModules[`@/${suffix}`] ??
+    pageModules[`/src/${suffix}`] ??
+    Object.entries(pageModules).find(([key]) => key.endsWith(`/${suffix}`))?.[1]
+  if (!loader) {
+    // 清单写错 view 时，构建/启动期就能看到明确报错，而不是点菜单才白屏
+    throw new Error(`nav/manifest.ts 中的 view '${view}' 找不到对应页面 src/${suffix}`)
+  }
+  return loader
+}
+
+const routes: RouteRecordRaw[] = NAV_ENTRIES.map((entry) => ({
+  path: entry.path,
+  name: entry.path === '/' ? 'dashboard' : entry.view,
+  component: resolveComponent(entry.view),
+}))
 
 const router = createRouter({
   history: createWebHistory(),
-  routes: [
-    { path: '/', name: 'dashboard', component: Dashboard },
-    { path: '/register', name: 'register', component: Register },
-    { path: '/boiler', name: 'boiler', component: Boiler },
-    { path: '/pressurevessel', name: 'pressurevessel', component: Pressurevessel },
-    { path: '/pipeline', name: 'pipeline', component: Pipeline },
-    { path: '/elevator', name: 'elevator', component: Elevator },
-    { path: '/crane', name: 'crane', component: Crane },
-    { path: '/forklift', name: 'forklift', component: Forklift },
-    { path: '/inspection', name: 'inspection', component: Inspection },
-    { path: '/maintenance', name: 'maintenance', component: Maintenance },
-    { path: '/hazard', name: 'hazard', component: Hazard },
-    { path: '/accident', name: 'accident', component: Accident },
-    { path: '/operator', name: 'operator', component: Operator },
-    { path: '/training', name: 'training', component: Training },
-    { path: '/safetyvalve', name: 'safetyvalve', component: Safetyvalve },
-    { path: '/gauge', name: 'gauge', component: Gauge },
-    { path: '/sparepart', name: 'sparepart', component: Sparepart },
-    { path: '/emergency', name: 'emergency', component: Emergency },
-    { path: '/energyeff', name: 'energyeff', component: Energyeff },
-    { path: '/archive', name: 'archive', component: Archive },
-    { path: '/contract', name: 'contract', component: Contract },
-  ],
+  routes,
 })
 
 export default router
