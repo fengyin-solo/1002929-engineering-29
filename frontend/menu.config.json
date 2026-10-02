@@ -1,0 +1,26 @@
+{
+  "_comment": "导航菜单与前端路由的唯一清单。新增模块只改这里，然后执行 `make menu`（或 npm run gen:menu）重新生成 src/menu.generated.ts；`make doctor` 会校验生成结果是否过期。path 为路由路径，view 为 frontend/src 下的视图文件。",
+  "items": [
+    { "path": "/", "name": "dashboard", "label": "运营概览", "view": "views/Dashboard.vue" },
+    { "path": "/register", "name": "register", "label": "使用登记", "view": "views/register/index.vue" },
+    { "path": "/boiler", "name": "boiler", "label": "锅炉管理", "view": "views/boiler/index.vue" },
+    { "path": "/pressurevessel", "name": "pressurevessel", "label": "压力容器", "view": "views/pressurevessel/index.vue" },
+    { "path": "/pipeline", "name": "pipeline", "label": "压力管道", "view": "views/pipeline/index.vue" },
+    { "path": "/elevator", "name": "elevator", "label": "电梯管理", "view": "views/elevator/index.vue" },
+    { "path": "/crane", "name": "crane", "label": "起重机械", "view": "views/crane/index.vue" },
+    { "path": "/forklift", "name": "forklift", "label": "场车管理", "view": "views/forklift/index.vue" },
+    { "path": "/inspection", "name": "inspection", "label": "定期检验", "view": "views/inspection/index.vue" },
+    { "path": "/maintenance", "name": "maintenance", "label": "维保记录", "view": "views/maintenance/index.vue" },
+    { "path": "/hazard", "name": "hazard", "label": "隐患排查", "view": "views/hazard/index.vue" },
+    { "path": "/accident", "name": "accident", "label": "事故管理", "view": "views/accident/index.vue" },
+    { "path": "/operator", "name": "operator", "label": "作业人员", "view": "views/operator/index.vue" },
+    { "path": "/training", "name": "training", "label": "培训考核", "view": "views/training/index.vue" },
+    { "path": "/safetyvalve", "name": "safetyvalve", "label": "安全阀校验", "view": "views/safetyvalve/index.vue" },
+    { "path": "/gauge", "name": "gauge", "label": "压力表检定", "view": "views/gauge/index.vue" },
+    { "path": "/sparepart", "name": "sparepart", "label": "备件管理", "view": "views/sparepart/index.vue" },
+    { "path": "/emergency", "name": "emergency", "label": "应急演练", "view": "views/emergency/index.vue" },
+    { "path": "/energyeff", "name": "energyeff", "label": "能效监测", "view": "views/energyeff/index.vue" },
+    { "path": "/archive", "name": "archive", "label": "档案管理", "view": "views/archive/index.vue" },
+    { "path": "/contract", "name": "contract", "label": "维保合同", "view": "views/contract/index.vue" }
+  ]
+}

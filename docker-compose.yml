@@ -2,12 +2,13 @@ services:
   backend:
     build: ./backend
     ports:
-      - "8000:8000"
+      # 宿主侧端口取根目录 dev.conf（.env 由其生成），容器内保持 8000
+      - "${DEV_BACKEND_PORT:-8000}:8000"
     environment:
       - APP_ENV=local
   frontend:
     build: ./frontend
     ports:
-      - "5173:5173"
+      - "${DEV_FRONTEND_PORT:-5173}:5173"
     depends_on:
       - backend

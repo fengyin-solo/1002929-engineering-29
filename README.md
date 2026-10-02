@@ -18,32 +18,67 @@
 │   ├── app/routers/          每个业务模块一组接口
 │   ├── app/services/         业务规则与状态流转
 │   └── app/store.py          内存数据仓库与示例数据
+├── scripts/                  setup / preflight / dev 等固定动作脚本
+├── dev.conf                  本地开发唯一配置源（端口等）
+├── Makefile                  固定动作入口
 ├── .gitignore
 └── docker-compose.yml
 ```
 
-## 启动
+## 本地开发：固定动作
 
-### 后端
-
-```bash
-cd backend
-python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
-./run.sh
-```
-
-健康检查：`curl http://127.0.0.1:8000/api/health`
-
-### 前端
+所有入口都收敛到仓库根目录的 Makefile，新同事照这三步走即可：
 
 ```bash
-cd frontend
-npm install
-npm run dev
+make setup     # 1. 按锁文件装一遍依赖（后端 venv + 前端 npm ci）
+make dev       # 2. 先做启动前检查，通过后一键起前后端（Ctrl+C 一起停）
+# 3. 浏览器打开终端打印的前端地址（dev server 不会自动开页面）
 ```
 
-前端默认监听 `http://127.0.0.1:5173/`，dev server 不会自动打开浏览器，
-需要自己访问。`/api` 由 vite 代理到后端 `http://127.0.0.1:8000`。
+| 命令 | 作用 |
+| --- | --- |
+| `make setup` | 依赖**严格按锁文件**安装：后端 `backend/requirements.lock`、前端 `frontend/package-lock.json`。每一步有完成标记和输入指纹：没装完失败会停下并说清，重跑只补缺失的那一步；锁没变时反复执行不会重装。 |
+| `make doctor` | 只检查依赖与生成物状态，不碰端口。 |
+| `make dev` | 启动前检查（依赖、两个端口是否空闲）→ 起后端并轮询 `/api/health` → 起前端。前端经 `/api` 代理到后端。 |
+| `make backend` / `make frontend` | 分开起。单独起前端时会要求后端已连通。 |
+| `make menu` | 按 `frontend/menu.config.json` 重新生成路由与导航。 |
+| `make up` / `make down` | 容器方式起停（docker compose），宿主端口同样取 `dev.conf`。 |
+
+### 唯一配置源：dev.conf
+
+`dev.conf` 是本地开发的唯一配置源（随仓库提交），后端端口、前端端口、健康检查路径都在这里：
+
+- `backend/app/config.py`（监听端口、CORS 来源）、`frontend/vite.config.ts`（监听端口、代理目标）、
+  `scripts/*`（启动前检查、健康轮询）、`docker-compose.yml`（宿主端口映射）全部读这一份，改端口只改一处。
+- 仍可用环境变量临时覆盖：`DEV_BACKEND_PORT`、`DEV_FRONTEND_PORT`、`DEV_HOST`、`VITE_PROXY_TARGET`。
+
+### 导航菜单与路由同源
+
+侧边导航与前端路由不再各写一套，都由 `frontend/menu.config.json` 这一份清单生成
+（生成物 `frontend/src/menu.generated.ts` 随仓库提交，输出是确定性的，任何机器生成结果一致）：
+
+1. 新增/调整菜单只改 `menu.config.json`（path、路由 name、菜单 label、视图文件 view）；
+2. 执行 `make menu`（或在 frontend 下 `npm run gen:menu`）重新生成；
+3. `make doctor` / `make setup` 会校验生成物是否过期，清单改了没生成会直接失败并提示。
+
+### 兼容的既有命令
+
+旧习惯仍然可用，底层都会经过同一套检查：
+
+```bash
+cd backend && ./run.sh          # 等价 make backend；端口取 dev.conf
+cd frontend && npm install      # 不推荐；请用根目录 make setup（npm ci 按锁文件）
+cd frontend && npm run dev      # 等价 make frontend
+make install                    # 旧命令，等价 make setup
+```
+
+后端健康检查：`curl http://127.0.0.1:8000/api/health`（端口随 `dev.conf`）。
+
+### 锁文件维护
+
+- 前端：改 `package.json` 后在 `frontend/` 执行 `npm install` 更新 `package-lock.json` 并提交。
+- 后端：改 `requirements.txt` 后在**全新 venv** 中 `pip install -r requirements.txt`，
+  用 `pip freeze` 更新 `backend/requirements.lock` 并提交。
 
 ## 业务模块
 

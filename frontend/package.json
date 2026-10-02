@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "gen:menu": "node scripts/gen-menu.mjs",
+    "check:menu": "node scripts/gen-menu.mjs --check"
   },
   "dependencies": {
     "pinia": "^2.1.7",
